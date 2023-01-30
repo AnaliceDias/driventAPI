@@ -21,8 +21,8 @@ export async function getPaymentsByTicketId(req: AuthenticatedRequest, res: Resp
 export async function processPayment(req: AuthenticatedRequest, res: Response) {
   const { ticketId } = req.body;
   const ticket = res.locals.ticket;
-  let cardLastDigits = req.body.cardData.number;
-  cardLastDigits = cardLastDigits.substring(cardLastDigits.lenght - 4);
+  let cardLastDigits = req.body.cardData.number.toString();
+  cardLastDigits = cardLastDigits.substring(cardLastDigits.length - 4, cardLastDigits.length);
 
   try {
     const price = await ticketsService.getTicketPrice(ticket.ticketTypeId);
@@ -30,8 +30,8 @@ export async function processPayment(req: AuthenticatedRequest, res: Response) {
     const paymentData = {
       ticketId: +ticketId,
       value: price,
-      cardIssuer: stringify(req.body.cardData.issuer),
-      cardLastDigits: stringify(cardLastDigits),
+      cardIssuer: req.body.cardData.issuer,
+      cardLastDigits: cardLastDigits,
     };
 
     const newPayment = await paymentsServices.registerPayment(paymentData);
