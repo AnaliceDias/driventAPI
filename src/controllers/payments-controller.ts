@@ -3,7 +3,6 @@ import paymentsServices from "@/services/payments-service";
 import ticketsService from "@/services/tickets-sevice";
 import { Response } from "express";
 import httpStatus from "http-status";
-import { stringify } from "querystring";
 
 export async function getPaymentsByTicketId(req: AuthenticatedRequest, res: Response) {
   const { ticketId } = req.query;
@@ -26,16 +25,17 @@ export async function processPayment(req: AuthenticatedRequest, res: Response) {
 
   try {
     const price = await ticketsService.getTicketPrice(ticket.ticketTypeId);
-
+    
     const paymentData = {
       ticketId: +ticketId,
       value: price,
       cardIssuer: req.body.cardData.issuer,
       cardLastDigits: cardLastDigits,
     };
-
-    const newPayment = await paymentsServices.registerPayment(paymentData);
     
+    const newPayment = await paymentsServices.registerPayment(paymentData);
+    await ticketsService.updateTicketStatus(+ticketId);
+
     return res.status(httpStatus.OK).send(newPayment);
   } catch (error) {
     if (error.name === "NotFoundError") return res.sendStatus(httpStatus.NOT_FOUND);
