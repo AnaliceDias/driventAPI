@@ -33,12 +33,18 @@ async function getTicketPrice(ticketTypeId: number) {
   return price;
 }
 
+async function updateTicketStatus(ticketId: number) {
+  const result = await ticketsRepository.updateTicketStatus(ticketId);
+  return result;
+}
+
 const ticketsService = {
   getTicketsTypes,
   getTicketByUserId,
   createTicket,
   getTicketByTicketId,
   getTicketPrice,
+  updateTicketStatus,
 };
 
 export default ticketsService;
