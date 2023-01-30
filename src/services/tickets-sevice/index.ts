@@ -13,9 +13,17 @@ async function getTicketByUserId(userId: number) {
   return result;
 }
 
+async function createTicket(ticketTypeId: number, enrollmentId: number) {
+  const result = ticketsRepository.createTicket(ticketTypeId, enrollmentId);
+  if (!result) throw notFoundError();
+  
+  return result;
+}
+
 const ticketsService = {
   getTicketsTypes,
-  getTicketByUserId
+  getTicketByUserId,
+  createTicket,
 };
 
 export default ticketsService;
