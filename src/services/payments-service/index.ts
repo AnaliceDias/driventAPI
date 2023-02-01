@@ -1,30 +1,62 @@
-import { notFoundError, unauthorizedError } from "@/errors"; 
-import paymentsRepository from "@/repositories/payments-repository";
-import { Enrollment, Payment } from "@prisma/client";
+import { notFoundError, unauthorizedError } from "@/errors";
+import paymentRepository, { PaymentParams } from "@/repositories/payment-repository";
+import ticketRepository from "@/repositories/ticket-repository";
+import enrollmentRepository from "@/repositories/enrollment-repository";
 
-async function getPaymentsByTicketId(ticketId: number) {
-  const payment = await paymentsRepository.findPaymentsByTicketId(ticketId);
-  if (!payment) throw notFoundError();
-  
+async function verifyTicketAndEnrollment(ticketId: number, userId: number) {
+  const ticket = await ticketRepository.findTickeyById(ticketId);
+
+  if (!ticket) {
+    throw notFoundError();
+  }
+  const enrollment = await enrollmentRepository.findById(ticket.enrollmentId);
+
+  if (enrollment.userId !== userId) {
+    throw unauthorizedError();
+  }
+}
+
+async function getPaymentByTicketId(userId: number, ticketId: number) {
+  await verifyTicketAndEnrollment(ticketId, userId);
+
+  const payment = await paymentRepository.findPaymentByTicketId(ticketId);
+
+  if (!payment) {
+    throw notFoundError();
+  }
   return payment;
 }
 
-async function checkUserId(enrollment: Enrollment, userId: number) {
-  if(enrollment.userId !== userId) throw unauthorizedError();
-  return;
+async function paymentProcess(ticketId: number, userId: number, cardData: CardPaymentParams) {
+  await verifyTicketAndEnrollment(ticketId, userId);
+
+  const ticket = await ticketRepository.findTickeWithTypeById(ticketId);
+
+  const paymentData = {
+    ticketId,
+    value: ticket.TicketType.price,
+    cardIssuer: cardData.issuer,
+    cardLastDigits: cardData.number.toString().slice(-4),
+  };
+
+  const payment = await paymentRepository.createPayment(ticketId, paymentData);
+
+  await ticketRepository.ticketProcessPayment(ticketId);
+
+  return payment;
 }
 
-async function registerPayment(payment: Omit<Payment, "id" | "updatedAt" | "createdAt">) {
-  const newPayment = await paymentsRepository.insertPayment(payment);
-  if (!newPayment) throw notFoundError();
-
-  return newPayment;
+export type CardPaymentParams = {
+  issuer: string,
+  number: number,
+  name: string,
+  expirationDate: Date,
+  cvv: number
 }
 
-const paymentsServices = {
-  checkUserId,
-  getPaymentsByTicketId,
-  registerPayment,
+const paymentService = {
+  getPaymentByTicketId,
+  paymentProcess,
 };
-  
-export default paymentsServices;
+
+export default paymentService;
