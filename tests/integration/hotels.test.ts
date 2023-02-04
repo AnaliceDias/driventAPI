@@ -23,6 +23,16 @@ describe("Authentication tests for the hotels route", () => {
 
     expect(response.status).toBe(httpStatus.UNAUTHORIZED);
   });
+
+  it("should respond with status 401 if given token is not valid", async () => {
+    const token = "issoNaoEUmToken";
+
+    const resNoToken = await server.get("/hotels/*");
+    const resInvalidToken = await server.get("/hotels/*").set("Authorization", `Bearer ${token}`);
+
+    expect(resNoToken.status).toBe(httpStatus.UNAUTHORIZED);
+    expect(resInvalidToken.status).toBe(httpStatus.UNAUTHORIZED);
+  });
 });
 
 const server = supertest(app);
