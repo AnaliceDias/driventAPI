@@ -7,10 +7,11 @@ async function checkIncludesHotel(req: AuthenticatedRequest, res: Response, next
   const userId = req.body;
   try {
     const ticket = await ticketService.getTicketByUserId(userId);
+
     const ticketStatus = ticket.status;
     const includesHotel = ticket.TicketType.includesHotel;
 
-    if(ticketStatus !== "PAID" || !includesHotel) return res.sendStatus(httpStatus.UNAUTHORIZED);
+    if(ticketStatus !== "PAID" || !includesHotel) return res.sendStatus(httpStatus.PAYMENT_REQUIRED);
     
     next();
   }catch(error) {
