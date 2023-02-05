@@ -88,11 +88,19 @@ async function getEnrollmentById(enrollmentId: number) {
   return result;
 }
 
+async function getEnrollmentByUserId(userId: number) {
+  const result = await enrollmentRepository.findEnrollmentByUserId(userId);
+  if (!result) throw notFoundError();
+
+  return result;
+}
+
 const enrollmentsService = {
   getOneWithAddressByUserId,
   createOrUpdateEnrollmentWithAddress,
   getAddressFromCEP,
   getEnrollmentById,
+  getEnrollmentByUserId,
 };
 
 export default enrollmentsService;
