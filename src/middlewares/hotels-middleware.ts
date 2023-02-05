@@ -15,6 +15,7 @@ async function checkIncludesHotel(req: AuthenticatedRequest, res: Response, next
     
     next();
   }catch(error) {
+    if(error.name === "NotFoundError") return res.sendStatus(httpStatus.PAYMENT_REQUIRED);
     return res.sendStatus(httpStatus.INTERNAL_SERVER_ERROR);
   }
 }
