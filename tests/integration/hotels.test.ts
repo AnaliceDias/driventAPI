@@ -68,8 +68,7 @@ describe("GET /hotels", () => {
     const token = await generateValidToken(user);
     const enrollment = await createEnrollmentWithAddress(user);
     const ticketType = await createTicketTypeCustomizable(false, true);
-    const ticket = await createTicket(enrollment.id, ticketType.id, TicketStatus.RESERVED);
-    await createPayment(ticket.id, ticketType.price);
+    await createTicket(enrollment.id, ticketType.id, TicketStatus.RESERVED);
     await createHotels();
 
     const response = await server.get("/hotels").set("Authorization", `Bearer ${token}`);
@@ -100,5 +99,19 @@ describe("GET /hotels", () => {
     const response = await server.get("/hotels").set("Authorization", `Bearer ${token}`);
     
     expect(response.status).toEqual(httpStatus.PAYMENT_REQUIRED);
+  });
+});
+
+describe("GET /hotels/:hotelId", () => {
+  it("should respond with status 404 if the hotelId is non-existent", async () => {
+    const user = await createUser();
+    const token = await generateValidToken(user);
+    const enrollment = await createEnrollmentWithAddress(user);
+    const ticketType = await createTicketTypeCustomizable(false, true);
+    await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
+
+    const response = await server.get("/hotels/1").set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toEqual(httpStatus.NOT_FOUND);
   });
 });
