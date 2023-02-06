@@ -128,4 +128,15 @@ describe("GET /hotels/:hotelId", () => {
     
     expect(response.status).toEqual(httpStatus.PAYMENT_REQUIRED);
   });
+
+  it("Should return 402 when user is not enrolled", async () => {
+    const user = await createUser();
+    const token = await generateValidToken(user);
+    const hotel = await createHotels();
+    const hotelId = hotel[0].id;
+
+    const response = await server.get(`/hotels/${hotelId}`).set("Authorization", `Bearer ${token}`);
+    
+    expect(response.status).toEqual(httpStatus.PAYMENT_REQUIRED);
+  });
 });
