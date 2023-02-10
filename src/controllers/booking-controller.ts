@@ -36,3 +36,14 @@ export async function registerBooking(req: AuthenticatedRequest, res: Response) 
     return res.sendStatus(httpStatus.NOT_FOUND);
   }
 }
+
+export async function updateBooking(req: AuthenticatedRequest, res: Response) {
+  const { roomId } = req.body;
+  const { bookingId } = req.params;
+  try{
+    const bookingUpdate = await bookingService.updateBooking(+bookingId, roomId);
+    return res.status(httpStatus.OK).send({ bookingId: bookingUpdate.id });
+  }catch(error) {
+    return res.sendStatus(httpStatus.NOT_FOUND);
+  }
+}
