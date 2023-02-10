@@ -1,11 +1,12 @@
 import { Router } from "express";
-import { authenticateToken } from "@/middlewares";
-import { getBookingByToken } from "@/controllers/booking-controller";
+import { authenticateToken, checkVacancies } from "@/middlewares";
+import { getBookingByToken, registerBooking } from "@/controllers/booking-controller";
 
 const bookingRouter = Router();
 
 bookingRouter
   .all("/*", authenticateToken)
-  .get("/", getBookingByToken);
+  .get("/", getBookingByToken)
+  .post("/", checkVacancies, registerBooking);
 
 export { bookingRouter };
