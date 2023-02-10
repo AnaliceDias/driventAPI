@@ -20,3 +20,12 @@ export async function createRoomWithHotelId(hotelId: number) {
     }
   });
 }
+
+export async function generateNonExistentRoomId(existingRoomId: number) {
+  let id: number = +faker.random.numeric();
+  while(id === existingRoomId) {
+    id = +faker.random.numeric();
+  }
+  return id;
+}
+
