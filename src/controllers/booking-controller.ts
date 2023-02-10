@@ -24,7 +24,6 @@ export async function getBookingByToken(req: AuthenticatedRequest, res: Response
 export async function registerBooking(req: AuthenticatedRequest, res: Response) {
   const { userId } = req;
   const { roomId } = req.body;
-
   try {
     await bookingService.registerBooking(userId, roomId);
     const response = {
@@ -33,7 +32,7 @@ export async function registerBooking(req: AuthenticatedRequest, res: Response) 
 
     return res.status(httpStatus.CREATED).send(response);
   }catch(error) {
-    return res.sendStatus(httpStatus.NOT_FOUND);
+    return res.sendStatus(httpStatus.INTERNAL_SERVER_ERROR);
   }
 }
 
