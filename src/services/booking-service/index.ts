@@ -7,8 +7,16 @@ async function getBookingByUserId(userId: number) {
   return booking;
 }
 
+async function registerBooking(userId: number, roomId: number) {
+  const booking = await bookingRepository.createBooking(userId, roomId);
+
+  if(!booking) throw notFoundError;
+  return booking;
+}
+
 const bookingService = {
   getBookingByUserId,
+  registerBooking,
 };
 
 export default bookingService;
