@@ -16,7 +16,7 @@ async function registerBooking(userId: number, roomId: number) {
 
 async function countBookingByRoomId(roomId: number) {
   const count = await bookingRepository.countBookingByRoomId(roomId);
-  if(!count) throw notFoundError;
+  if(!count) return 0;
   return count;
 }
 
