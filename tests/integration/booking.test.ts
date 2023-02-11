@@ -65,3 +65,33 @@ describe("/booking when there are authentication problems", () => {
     expect(responsePut.status).toBe(httpStatus.UNAUTHORIZED);
   });
 });
+
+describe("GET /booking", () => {
+  it("should respond with status 200", async () => {
+    const user = await createUser();
+    const token = await generateValidToken(user);
+    const enrollment = await createEnrollmentWithAddress(user);
+    const ticketType = await createTicketTypeWithHotel();
+    const ticket = await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
+    await createPayment(ticket.id, ticketType.price);
+    const hotel = await createHotel();
+    const room = await createRoomWithHotelId(hotel.id);
+    await createBooking(user.id, room.id);
+    
+    const response = await server.get("/booking").set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toEqual(httpStatus.OK);
+    expect(response.body).toEqual({
+      id: expect.any(Number),
+      Room: expect.objectContaining({
+        id: expect.any(Number),
+        name: expect.any(String),
+        capacity: expect.any(Number),
+        hotelId: expect.any(Number),
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+
+      })
+    });
+  });
+});
