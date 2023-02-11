@@ -200,4 +200,43 @@ describe("PUT /booking/:bookingId", () => {
     
     expect(response.status).toEqual(httpStatus.NOT_FOUND);
   });
+
+  it("should return 403 when the room has no more spaces available", async () => {
+    const ticketType = await createTicketTypeWithHotel();
+    const hotel = await createHotel();
+    const room = await createRoomWithHotelId(hotel.id);
+
+    const firtsUser = await createUser();
+    const firstEnrollment = await createEnrollmentWithAddress(firtsUser);
+    const firstTicket = await createTicket(firstEnrollment.id, ticketType.id, TicketStatus.PAID);
+    await createPayment(firstTicket.id, ticketType.price);
+    await createBooking(firtsUser.id, room.id);
+
+    const secondUser = await createUser();
+    const secondEnrollment = await createEnrollmentWithAddress(secondUser);
+    const secondTicket = await createTicket(secondEnrollment.id, ticketType.id, TicketStatus.PAID);
+    await createPayment(secondTicket.id, ticketType.price);
+    await createBooking(secondUser.id, room.id);
+
+    const thirdUser = await createUser();
+    const thirdEnrollment = await createEnrollmentWithAddress(thirdUser);
+    const thirdTicket = await createTicket(thirdEnrollment.id, ticketType.id, TicketStatus.PAID);
+    await createPayment(thirdTicket.id, ticketType.price);
+    await createBooking(thirdUser.id, room.id);
+
+    const user = await createUser();
+    const token = await generateValidToken(user);
+    const enrollment = await createEnrollmentWithAddress(user);
+    const ticket = await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
+    await createPayment(ticket.id, ticketType.price);
+    const booking = await createBooking(user.id, room.id);
+    
+    const body = {
+      roomId: room.id,
+    };
+
+    const response = await server.put(`/booking/${booking.id}`).set("Authorization", `Bearer ${token}`).send(body);
+
+    expect(response.status).toEqual(httpStatus.FORBIDDEN);
+  });
 });
