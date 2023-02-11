@@ -110,3 +110,27 @@ describe("GET /booking", () => {
     expect(response.status).toEqual(httpStatus.NOT_FOUND);
   });
 });
+
+describe("POST /booking", () => {
+  it("should respond with status 201", async () => {
+    const user = await createUser();
+    const token = await generateValidToken(user);
+    const enrollment = await createEnrollmentWithAddress(user);
+    const ticketType = await createTicketTypeWithHotel();
+    const ticket = await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
+    await createPayment(ticket.id, ticketType.price);
+    const hotel = await createHotel();
+    const room = await createRoomWithHotelId(hotel.id);
+
+    const body = {
+      roomId: room.id,
+    };
+
+    const response = await server.post("/booking").set("Authorization", `Bearer ${token}`).send(body);
+    
+    expect(response.status).toEqual(httpStatus.CREATED);
+    expect(response.body).toEqual({
+      roomId: expect.any(Number),
+    });
+  });
+});
